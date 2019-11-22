@@ -1,7 +1,7 @@
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-import tkinter
+import tkinter as tk
 
 
 fig = plt.figure(figsize=(5, 10))  # Initialize the figure
@@ -36,10 +36,40 @@ def fast_fourier_transform(samples, root):  # FFT algorithm starts here
     return r
 
 
+master = tk.Tk() # create Tkinter object
+
+# input labels
+tk.Label(master, text="Frequency (Hz)").grid(row=0)
+tk.Label(master, text="Offset").grid(row=1)
+
+# input rows
+e1 = tk.Entry(master)
+e2 = tk.Entry(master)
+# default values
+e1.insert(10, "40")
+e2.insert(10, "0")
+
+e1.grid(row=0, column=1)
+e2.grid(row=1, column=1)
+
+# submit values and begin visualization
+tk.Button(master,
+          text='Start',
+          command=master.quit).grid(row=3,
+                                    column=0,
+                                    sticky=tk.W,
+                                    pady=4)
+
+master.mainloop()
+
+
 fs = 500  # (SAMPLING RATE HZ)
-f = 40  # (Frequency HZ)
+# f = 40  # (Frequency HZ)
+f = int(e1.get())  # get Frequency in Hz from user input
+o = int(e2.get())  # offset of function
 t = np.linspace(0, 0.5, fs)  # (SAMPLING PERIOD s)
-s = np.sin(f * 2 * np.pi * t)  # (SINE WAVE)
+
+s = np.sin(f * 2 * np.pi * t + o)  # (SINE WAVE)
 sn = s.size  # Signal samples
 ax1 = fig.add_subplot(311)  # Initialize the first sine wave plot
 plt.ylabel("Amplitude")
@@ -60,5 +90,12 @@ for f1, f2 in zip(f, fft):  # Plot the frequency domain and polar
     [polar_plot(f2)]
     ax3.bar(f1, abs(f2), width=1.5)  # 1 / N is a normalization factor
     plt.pause(.02)
+
+
+
+
+
+
+
 
 plt.show()
