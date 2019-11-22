@@ -38,6 +38,7 @@ def fast_fourier_transform(samples, root, count):  # FFT algorithm starts here
     # plot if designated
     print(count)
     if count:
+        ax4.cla()
         ti = t[1] - t[0]  # Take a discrete interval from the signal time domain
         f = np.linspace(0, 1 / ti, sn)  # 1/ti duration signal
         for p1, p2 in zip(f, r):  # Plot the frequency domain and polar
@@ -46,10 +47,10 @@ def fast_fourier_transform(samples, root, count):  # FFT algorithm starts here
             plt.pause(.02)
         ax4.scatter(transformed_left, np.zeros_like(transformed_left), alpha=.9)
         ax4.scatter(transformed_right, np.zeros_like(transformed_right), alpha=.4)
-        plt.pause(.06)
+        plt.pause(.09)
         ax2.cla()
         ax3.cla()
-
+        ax4.cla()
     return r
 
 
