@@ -38,17 +38,25 @@ def fast_fourier_transform(samples, root, printable, side, layer):  # FFT algori
 
     # plot if designated
     if printable:
-        fig.suptitle(side + 'Layer ' + str(layer))
+        fig.suptitle(side + 'Layer ' + str(layer), size=16)
         ax4.cla()
+
+        ax3.set(xlabel="Frequency [Hz]", ylabel="Amplitude")
+        ax3.title.set_text('Current Output Signal in Frequency Domain')
+
+        ax4.title.set_text('Current Left and Right Values')
+
+        if layer == 0:
+            ax3.title.set_text('Final Output Signal in Frequency Domain')
         ax4.scatter(transformed_left, np.zeros_like(transformed_left), alpha=.9)
         ax4.scatter(transformed_right, np.zeros_like(transformed_right), alpha=.4)
-
+        plt.tight_layout()
         ti = t[1] - t[0]  # Take a discrete interval from the signal time domain
         f = np.linspace(0, 1 / ti, sn)  # 1/ti duration signal
         for p1, p2 in zip(f, r):  # Plot the frequency domain and polar
             ax2.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
             ax3.bar(p1, abs(p2), width=1.5)  # 1 / N is a normalization factor
-            plt.pause(.01)
+            plt.pause(.0001)
 
         plt.waitforbuttonpress()
         ax2.cla()
@@ -104,20 +112,26 @@ t = np.linspace(0, 0.5, fs)  # (SAMPLING PERIOD s)
 s = am1 * np.sin(fr1 * 2 * np.pi * t) + am2 * np.sin(fr2 * 2 * np.pi * t)  # (SINE WAVE)
 sn = s.size  # Signal samples
 
-fig = plt.figure(figsize=(10, 10))  # Initialize the figure
-ax2 = fig.add_subplot(222, projection='polar')  # Initialize the second polar plot
+fig = plt.figure(figsize=(10, 15))  # Initialize the figure
+plt.tight_layout()
 ax1 = fig.add_subplot(221)  # Initialize the first sine wave plot
-ax1.title.set_text('Original Input ')
+ax1.title.set_text('Original Input')
 ax1.set(xlabel="Time [s]", ylabel="Amplitude")
 ax1.plot(t, s)
-ax4 = fig.add_subplot(223) # plot the current left/right values
+
+ax2 = fig.add_subplot(222, projection='polar')  # Initialize the second polar plot
+
+ax4 = fig.add_subplot(223)  # plot the current left/right values
+
 ax3 = fig.add_subplot(224)  # Initialize the third plot signal in frequency domain
-ax3.set(xlabel="Frequency [Hz]", ylabel="Amplitude")
+plt.tight_layout()
+
+# set to full screen
 mng = plt.get_current_fig_manager()
 mng.full_screen_toggle()
 
 root = math.e ** (2 * math.pi * 1j / sn)  # root of unity
-fft = fast_fourier_transform(s, root, 2, 'Final Output', 0)  # get the signal in frequency domain
+fft = fast_fourier_transform(s, root, 2, 'Final Output ', 0)  # get the signal in frequency domain
 
 
 '''
