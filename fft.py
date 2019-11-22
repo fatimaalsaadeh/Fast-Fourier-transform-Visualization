@@ -2,13 +2,14 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 import tkinter as tk
+import sys
 
 
 # def polar_plot(cn):  # polar plot of complex number using the angle and
 #     ax2.plot([0, np.angle(cn)], [0, abs(cn)], marker='o')
 
 
-def fast_fourier_transform(samples, root, count):  # FFT algorithm starts here
+def fast_fourier_transform(samples, root, printable, side, layer):  # FFT algorithm starts here
     n = len(samples)  # length of the samples
 
     if n == 1:  # base case
@@ -17,15 +18,15 @@ def fast_fourier_transform(samples, root, count):  # FFT algorithm starts here
     # setup to show only one left/right pair at each level of recursion
     passonL = 0
     passonR = 0
-    if count == 2:
+    if printable == 2:
         passonL = 2
         passonR = 1
 
     left_side = [num for index, num in enumerate(samples) if index % 2 == 0]  # left side indices
     right_side = [num for index, num in enumerate(samples) if index % 2 == 1]  # right side indices
 
-    transformed_left = fast_fourier_transform(left_side, root * root, passonL)  # recursive on the left side
-    transformed_right = fast_fourier_transform(right_side, root * root, passonR)  # recursive on the right side
+    transformed_left = fast_fourier_transform(left_side, root * root, passonL, 'Left Side ', layer+1)  # recursive on the left side
+    transformed_right = fast_fourier_transform(right_side, root * root, passonR, 'Right Side ', layer+1)  # recursive on the right side
 
     m_root = 1  # root complex number multiplier for the power of it
 
@@ -36,18 +37,20 @@ def fast_fourier_transform(samples, root, count):  # FFT algorithm starts here
         m_root = m_root * root
 
     # plot if designated
-    print(count)
-    if count:
+    if printable:
+        fig.suptitle(side + 'Layer ' + str(layer))
         ax4.cla()
+        ax4.scatter(transformed_left, np.zeros_like(transformed_left), alpha=.9)
+        ax4.scatter(transformed_right, np.zeros_like(transformed_right), alpha=.4)
+
         ti = t[1] - t[0]  # Take a discrete interval from the signal time domain
         f = np.linspace(0, 1 / ti, sn)  # 1/ti duration signal
         for p1, p2 in zip(f, r):  # Plot the frequency domain and polar
             ax2.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
             ax3.bar(p1, abs(p2), width=1.5)  # 1 / N is a normalization factor
-            plt.pause(.02)
-        ax4.scatter(transformed_left, np.zeros_like(transformed_left), alpha=.9)
-        ax4.scatter(transformed_right, np.zeros_like(transformed_right), alpha=.4)
-        plt.pause(.09)
+            plt.pause(.01)
+
+        plt.waitforbuttonpress()
         ax2.cla()
         ax3.cla()
         ax4.cla()
@@ -101,18 +104,20 @@ t = np.linspace(0, 0.5, fs)  # (SAMPLING PERIOD s)
 s = am1 * np.sin(fr1 * 2 * np.pi * t) + am2 * np.sin(fr2 * 2 * np.pi * t)  # (SINE WAVE)
 sn = s.size  # Signal samples
 
-fig = plt.figure(figsize=(5, 10))  # Initialize the figure
-ax2 = fig.add_subplot(412, projection='polar')  # Initialize the second polar plot
-ax1 = fig.add_subplot(411)  # Initialize the first sine wave plot
-plt.ylabel("Amplitude")
-plt.xlabel("Time [s]")
+fig = plt.figure(figsize=(10, 10))  # Initialize the figure
+ax2 = fig.add_subplot(222, projection='polar')  # Initialize the second polar plot
+ax1 = fig.add_subplot(221)  # Initialize the first sine wave plot
+ax1.title.set_text('Original Input ')
+ax1.set(xlabel="Time [s]", ylabel="Amplitude")
 ax1.plot(t, s)
-ax4 = fig.add_subplot(414) # plot the current left/right values
-ax3 = fig.add_subplot(413)  # Initialize the third plot signal in frequency domain
-plt.ylabel("Amplitude")
-plt.xlabel("Frequency [Hz]")
+ax4 = fig.add_subplot(223) # plot the current left/right values
+ax3 = fig.add_subplot(224)  # Initialize the third plot signal in frequency domain
+ax3.set(xlabel="Frequency [Hz]", ylabel="Amplitude")
+mng = plt.get_current_fig_manager()
+mng.full_screen_toggle()
+
 root = math.e ** (2 * math.pi * 1j / sn)  # root of unity
-fft = fast_fourier_transform(s, root, 2)  # get the signal in frequency domain
+fft = fast_fourier_transform(s, root, 2, 'Final Output', 0)  # get the signal in frequency domain
 
 
 '''
