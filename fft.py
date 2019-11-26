@@ -227,7 +227,7 @@ class Main:
 
     def __init__(self):
         master = tk.Tk()  # create Tkinter object
-
+        master.title("FFT Visualization")
         # input labels
         tk.Label(master, text="Frequency (Hz) Sinusoid 1").grid(row=0)
         tk.Label(master, text="Amplitude Sinusoid 1").grid(row=1)
