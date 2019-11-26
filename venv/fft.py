@@ -6,6 +6,7 @@ import tkinter as tk
 import pyaudio
 from matplotlib import gridspec
 from scipy.io import wavfile
+from test2 import stereoToMono
 
 
 class Main:
@@ -13,9 +14,8 @@ class Main:
     sp1, sp2, sp3, sp4 = None, None, None, None
     t, sn = 0, 0
     frames = []
-    fig = None
 
-    def fast_fourier_transform(self, is_sbs, samples, root, count, layer, side):  # FFT algorithm starts here
+    def fast_fourier_transform(self, is_sbs, samples, root, count):  # FFT algorithm starts here
         n = len(samples)  # length of the samples
         if n == 1:  # base case
             return samples
@@ -31,9 +31,9 @@ class Main:
         right_side = [num for index, num in enumerate(samples) if index % 2 == 1]  # right side indices
 
         transformed_left = self.fast_fourier_transform(is_sbs, left_side, root * root,
-                                                       pass_on_l, layer + 1, 'Left Side')  # recursive on the left side
+                                                       pass_on_l)  # recursive on the left side
         transformed_right = self.fast_fourier_transform(is_sbs, right_side, root * root,
-                                                        pass_on_r, layer + 1, 'Right Side')  # recursive on the right side
+                                                        pass_on_r)  # recursive on the right side
 
         m_root = 1  # root complex number multiplier for the power of it
 
@@ -44,50 +44,23 @@ class Main:
             m_root = m_root * root
         if count and is_sbs:
             self.sp4.cla()
-
-            # labels
-
-            self.fig.suptitle(side + ' Layer ' + str(layer), size=16)
-
-            self.sp1.set_title('Original Signal')
-            self.sp1.set_ylabel('Amplitude')  # x(t)
-            self.sp1.set_xlabel('Time [s]')
-
-            self.sp2.set_title('Amplitude Spectrum')
-            self.sp2.set_ylabel('Amplitude')  # |X[f]|
-            self.sp2.set_xlabel('Frequency (Hz)')
-
-            self.sp3.set_title('Phase Spectrum', y=1.15)
-            # self.sp3.set_ylabel('Phase (rads)')  # ∠X(k)
-            # self.sp3.set_yticks(np.arange(-math.pi, math.pi + 1, math.pi / 2))
-            # self.sp3.set_xlabel('Frequency (Hz)')
-
-            self.sp4.set_title('Current Left and Right Points')
-            self.sp4.set_ylabel('Imaginary Value')  # ∠X(k)
-            self.sp4.set_yticks(np.arange(-math.pi, math.pi + 1, math.pi / 2))
-            self.sp4.set_xlabel('Real Value')
-
-            plt.tight_layout()
-
-            self.sp4.scatter([x.real for x in transformed_left], [y.imag for y in transformed_left], alpha=.5)
-            self.sp4.scatter([x.real for x in transformed_right], [y.imag for y in transformed_right], alpha=.5)
-            self.sp4.legend(labels=('Left', 'Right'), loc=1)
-
             ti = self.t[1] - self.t[0]  # Take a discrete interval from the signal time domain
             f = np.linspace(0, 1 / ti, self.sn)  # 1/ti duration signal
             for p1, p2 in zip(f, r):  # Plot the frequency domain and polar
-                self.sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
-                self.sp2.bar(p1, abs(p2), width=1.5)  # 1 / N is a normalization factor
-                plt.pause(.0001)
+                self.sp2.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
+                self.sp3.bar(p1, abs(p2), width=1.5)  # 1 / N is a normalization factor
+                plt.pause(.02)
 
-            plt.waitforbuttonpress()
+            self.sp4.scatter([x.real for x in transformed_left], [y.imag for y in transformed_left], alpha=.9)
+            self.sp4.scatter([x.real for x in transformed_right], [y.imag for y in transformed_right], alpha=.4)
+            plt.pause(.09)
             self.sp2.cla()
             self.sp3.cla()
             self.sp4.cla()
         return r
 
     def polar_plot(self, cn):  # polar plot of complex number using the angle and
-        self.sp3.plot([0, np.angle(cn)], [0, abs(cn)], marker='o')
+        self.sp2.plot([0, np.angle(cn)], [0, abs(cn)], marker='o')
 
     def plot_it(self):
         file_name = "voice.wav"
@@ -102,8 +75,7 @@ class Main:
         wf.close()
 
         wave_sample_rate, wave_data = wavfile.read('voice.wav')
-        wave_data_sum = wave_data.sum(axis=1) / 2
-        wave_data = np.array(wave_data_sum, dtype='int16')
+        wave_data = stereoToMono(wave_data)
         amplitude = wave_data  # (SIGNAL AMPLITUDE)
         fs = wave_sample_rate  # (SAMPLING RATE HZ)
         sn = wave_data.size  # Signal samples
@@ -116,8 +88,8 @@ class Main:
         ti = t[1] - t[0]
         f = np.linspace(0, 1 / ti, sn)  # 1/ti duration signal
 
-        # fig2 = plt.figure(constrained_layout=True)
-        # gs = gridspec.GridSpec(2, 2, fig2, bottom=.05)
+        fig2 = plt.figure(constrained_layout=True)
+        gs = gridspec.GridSpec(2, 2, fig2, bottom=.05)
 
         sp1 = plt.subplot(gs[0, 0])
         sp1.set_title('Signal')
@@ -182,8 +154,8 @@ class Main:
         s = self.am1 * np.sin(self.fr1 * 2 * np.pi * t) + self.am2 * np.sin(self.fr2 * 2 * np.pi * t)  # (SINE WAVE)
         sn = s.size  # Signal samples
 
-        # fig2 = plt.figure(constrained_layout=True)
-        # gs = gridspec.GridSpec(2, 2, fig2, bottom=.05)  # Initialize the figure
+        fig2 = plt.figure(constrained_layout=True)
+        gs = gridspec.GridSpec(2, 2, fig2, bottom=.05)  # Initialize the figure
 
         plt.figure()
 
@@ -194,25 +166,25 @@ class Main:
         sp1.grid('on')
         plt.plot(t, s)  # (time, amplitude)
 
-        sp3 = plt.subplot(gs[0, 1], projection='polar')  # row 1, span all columns
-        sp3.set_title('Amplitude Spectrum')
-        sp3.set_ylabel('Amplitude')  # |X[f]|
-        sp3.set_xlabel('Frequency (Hz)')
-        sp3.grid('on')
-
-        sp2 = plt.subplot(gs[1,:])  # row 2, span all columns
-        sp2.set_title('Phase Spectrum')
-        sp2.set_ylabel('Phase (rads)')  # ∠X(k)
+        sp2 = plt.subplot(gs[0, 1], projection='polar')  # row 1, span all columns
+        sp2.set_title('Amplitude Spectrum')
+        sp2.set_ylabel('Amplitude')  # |X[f]|
         sp2.set_xlabel('Frequency (Hz)')
-        sp2.set_xscale('log')
         sp2.grid('on')
+
+        sp3 = plt.subplot(gs[1,:])  # row 2, span all columns
+        sp3.set_title('Phase Spectrum')
+        sp3.set_ylabel('Phase (rads)')  # ∠X(k)
+        sp3.set_xlabel('Frequency (Hz)')
+        sp3.set_xscale('log')
+        sp3.grid('on')
 
         root = math.e ** (2 * math.pi * 1j / sn)  # root of unity
         fft = self.fast_fourier_transform(False, s, root, 2)  # get the signal in frequency domain (DFT)
         f = np.linspace(0, 1 / ti, sn)  # 1/ti duration signal
         for p1, p2 in zip(f, fft):
-            sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
-            sp2.bar(p1, abs(p2), width=1.5)  # 1 / N is a normalization factor
+            sp2.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
+            sp3.bar(p1, abs(p2), width=1.5)  # 1 / N is a normalization factor
         plt.show()
 
     def step_by_step(self):
@@ -223,27 +195,35 @@ class Main:
             self.fr2 * 2 * np.pi * self.t)  # (SINE WAVE)
         self.sn = s.size  # Signal samples
 
-        # fig2 = plt.figure(constrained_layout=True)
-        self.fig = plt.figure()
-        gs = gridspec.GridSpec(2, 2, self.fig)  # Initialize the figure
+        fig2 = plt.figure(constrained_layout=True)
+        gs = gridspec.GridSpec(2, 2, fig2)  # Initialize the figure
 
-        # original signal
+        plt.figure()
         self.sp1 = plt.subplot(gs[0, 0])  # row 0, span all columns
+        self.sp1.set_title('Signal')
+        self.sp1.set_ylabel('Amplitude')  # x(t)
+        self.sp1.set_xlabel('Time [s]')
         plt.plot(self.t, s)  # (time, amplitude)
 
-        # polar plot
-        self.sp3 = plt.subplot(gs[0, 1], projection='polar')  # row 1, span all columns
+        self.sp2 = plt.subplot(gs[0, 1], projection='polar')  # row 1, span all columns
+        self.sp2.set_title('Amplitude Spectrum')
+        self.sp2.set_ylabel('Amplitude')  # |X[f]|
+        self.sp2.set_xlabel('Frequency (Hz)')
 
-        # amplitude plot
-        self.sp2 = plt.subplot(gs[1, 1])  # row 2, span all columns
+        self.sp3 = plt.subplot(gs[1, 0])  # row 2, span all columns
+        self.sp3.set_title('Phase Spectrum')
+        self.sp3.set_ylabel('Phase (rads)')  # ∠X(k)
+        self.sp3.set_yticks(np.arange(-math.pi, math.pi + 1, math.pi / 2))
+        self.sp3.set_xlabel('Frequency (Hz)')
 
-        # left/right values
-        self.sp4 = plt.subplot(gs[1, 0])  # row 2, span all columns
-
-        plt.tight_layout()
+        self.sp4 = plt.subplot(gs[1, 1])  # row 2, span all columns
+        self.sp4.set_title('FFT step by step')
+        self.sp4.set_ylabel('Phase (rads)')  # ∠X(k)
+        self.sp4.set_yticks(np.arange(-math.pi, math.pi + 1, math.pi / 2))
+        self.sp4.set_xlabel('Frequency (Hz)')
 
         root = math.e ** (2 * math.pi * 1j / self.sn)  # root of unity
-        fft = self.fast_fourier_transform(True, s, root, 2, 0, 'Final Result')  # get the signal in frequency domain
+        fft = self.fast_fourier_transform(True, s, root, 2)  # get the signal in frequency domain
 
     def __init__(self):
         master = tk.Tk()  # create Tkinter object
