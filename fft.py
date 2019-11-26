@@ -6,8 +6,6 @@ import tkinter as tk
 import pyaudio
 from matplotlib import gridspec
 from scipy.io import wavfile
-from test2 import stereoToMono
-
 
 class Main:
     fr1, fr2, am1, am2 = 0, 0, 0, 0
@@ -75,7 +73,8 @@ class Main:
         wf.close()
 
         wave_sample_rate, wave_data = wavfile.read('voice.wav')
-        wave_data = stereoToMono(wave_data)
+        wave_data_sum = wave_data.sum(axis=1) / 2
+        wave_data = np.array(wave_data_sum, dtype='int16')
         amplitude = wave_data  # (SIGNAL AMPLITUDE)
         fs = wave_sample_rate  # (SAMPLING RATE HZ)
         sn = wave_data.size  # Signal samples
