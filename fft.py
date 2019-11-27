@@ -65,7 +65,7 @@ class Main:
 
             self.sp4.set_title('Current Left and Right Points')
             self.sp4.set_ylabel('Imaginary Value')  # ∠X(k)
-            self.sp4.set_yticks(np.arange(-math.pi, math.pi + 1, math.pi / 2))
+            # self.sp4.set_yticks(np.arange(-math.pi, math.pi + 1, math.pi / 2))
             self.sp4.set_xlabel('Real Value')
 
             plt.tight_layout()
@@ -194,16 +194,16 @@ class Main:
         plt.plot(self.t, s)  # (time, amplitude)
 
         sp3 = plt.subplot(gs[0, 1], projection='polar')  # row 1, span all columns
-        sp3.set_title('Amplitude Spectrum')
-        sp3.set_ylabel('Amplitude')  # |X[f]|
-        sp3.set_xlabel('Frequency (Hz)')
+        sp3.set_title('Phase Spectrum')
+        # sp3.set_ylabel('Phase (rads)')  # ∠X(k)
+        # sp3.set_xlabel('Frequency (Hz)')
+        # sp3.set_xscale('log')
         sp3.grid('on')
 
         sp2 = plt.subplot(gs[1,:])  # row 2, span all columns
-        sp2.set_title('Phase Spectrum')
-        sp2.set_ylabel('Phase (rads)')  # ∠X(k)
+        sp2.set_title('Amplitude Spectrum')
+        sp2.set_ylabel('Amplitude')  # |X[f]|
         sp2.set_xlabel('Frequency (Hz)')
-        sp2.set_xscale('log')
         sp2.grid('on')
 
         root = math.e ** (2 * math.pi * 1j / sn)  # root of unity
