@@ -105,46 +105,43 @@ class Main:
         wave_sample_rate, wave_data = wavfile.read('voice.wav')
         wave_data_sum = wave_data.sum(axis=1) / 2
         wave_data = np.array(wave_data_sum, dtype='int16')
-        amplitude = wave_data  # (SIGNAL AMPLITUDE)
+        amplitude = wave_data
+
+        self.s = wave_data[200:700]  # (SIGNAL AMPLITUDE)
         fs = wave_sample_rate  # (SAMPLING RATE HZ)
-        sn = wave_data.size  # Signal samples
-        t = np.linspace(0, sn / fs, sn)  # time of each sample vector
+        self.sn = self.s.size  # Signal samples
+        self.t = np.linspace(0, self.sn / fs, self.sn)  # time of each sample vector
 
+        amplitude_n = wave_data.size
+        amt = np.linspace(0, amplitude_n / fs, amplitude_n)
+
+        # fig2 = plt.figure(constrained_layout=True)
+        self.fig = plt.figure()
+        gs = gridspec.GridSpec(2, 2, self.fig)  # Initialize the figure
+
+        # original signal
+        self.sp1 = plt.subplot(gs[0, 0])  # row 0, span all columns
+        plt.plot(amt, amplitude)  # (time, amplitude)
+
+        # polar plot
+        self.sp3 = plt.subplot(gs[0, 1], projection='polar')  # row 1, span all columns
+
+        # amplitude plot
+        self.sp2 = plt.subplot(gs[1, 1])  # row 2, span all columns
+
+        # left/right values
+        self.sp4 = plt.subplot(gs[1, 0])  # row 2, span all columns
+
+        plt.tight_layout()
         # Fast Fourier Transform
-        fft = self.fast_fourier_transform(False, wave_data, math.e ** (2 * math.pi * 1j / sn), 2)  # DFT
-        fft_phase = np.angle(fft)  # (DFT ANGLE rads)
-        fft_amplitude = np.abs(fft)  # (DFT AMPLITUDE)
-        ti = t[1] - t[0]
-        f = np.linspace(0, 1 / ti, sn)  # 1/ti duration signal
-
-        fig2 = plt.figure(constrained_layout=True)
-        gs = gridspec.GridSpec(2, 2, fig2, bottom=.05)
-
-        sp1 = plt.subplot(gs[0, 0])
-        sp1.set_title('Signal')
-        sp1.set_ylabel('Amplitude')
-        sp1.set_xlabel('Time [s]')
-        sp1.plot(t, amplitude)
-
-        sp2 = plt.subplot(gs[1, 0])
-        sp2.set_title('Amplitude Spectrum')
-        sp2.set_ylabel('Amplitude')
-        sp2.set_xlabel('Frequency (Hz)')
-        sp2.plot(f, fft_amplitude, color='red')
-
-        sp3 = plt.subplot(gs[0, 1], projection="polar")
-        sp3.set_title('Phase Spectrum')
-        sp3.set_ylabel('Phase (rads)')
-        sp3.set_xlabel('Frequency (Hz)')
-        sp3.plot(fft_phase, fft_amplitude, marker='o', color='orange')
-
-        plt.show()
+        root = math.e ** (2 * math.pi * 1j / self.sn)
+        fft = self.fast_fourier_transform(True, self.s[200:700], root, 2, 0, 'Final Result')  # DFT
 
     def start_recording(self):
         frames_per_buffer = 1024
         rate = 44100
         channels = 2
-        record_seconds = 3
+        record_seconds = 1
 
         p = pyaudio.PyAudio()
 
