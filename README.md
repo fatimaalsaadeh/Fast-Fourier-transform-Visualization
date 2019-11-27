@@ -22,8 +22,9 @@ python3 fft.py
 ### Prerequisites
 
 python3
-
-
+pyaudio
+tkinter
+wave
 
 ## Authors
 
