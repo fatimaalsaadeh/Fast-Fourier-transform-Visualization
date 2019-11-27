@@ -8,7 +8,9 @@ from matplotlib import gridspec
 from scipy.io import wavfile
 from tkinter import messagebox
 
-
+# Ashley Dunn, Fatima AlSaadeh
+# FFT visualizations
+# CS512
 class Main:
     fr1, fr2, am1, am2 = 0, 0, 0, 0
     sp1, sp2, sp3, sp4 = None, None, None, None
