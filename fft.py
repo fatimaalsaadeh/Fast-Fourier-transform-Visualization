@@ -105,15 +105,11 @@ class Main:
         wave_sample_rate, wave_data = wavfile.read('voice.wav')
         wave_data_sum = wave_data.sum(axis=1) / 2
         wave_data = np.array(wave_data_sum, dtype='int16')
-        amplitude = wave_data
 
-        self.s = wave_data[200:700]  # (SIGNAL AMPLITUDE)
+        self.s = wave_data  # (SIGNAL AMPLITUDE)
         fs = wave_sample_rate  # (SAMPLING RATE HZ)
         self.sn = self.s.size  # Signal samples
         self.t = np.linspace(0, self.sn / fs, self.sn)  # time of each sample vector
-
-        amplitude_n = wave_data.size
-        amt = np.linspace(0, amplitude_n / fs, amplitude_n)
 
         # fig2 = plt.figure(constrained_layout=True)
         self.fig = plt.figure()
@@ -121,7 +117,7 @@ class Main:
 
         # original signal
         self.sp1 = plt.subplot(gs[0, 0])  # row 0, span all columns
-        plt.plot(amt, amplitude)  # (time, amplitude)
+        plt.plot(self.t, self.s)  # (time, amplitude)
 
         # polar plot
         self.sp3 = plt.subplot(gs[0, 1], projection='polar')  # row 1, span all columns
@@ -135,7 +131,7 @@ class Main:
         plt.tight_layout()
         # Fast Fourier Transform
         root = math.e ** (2 * math.pi * 1j / self.sn)
-        fft = self.fast_fourier_transform(True, self.s[200:700], root, 2, 0, 'Final Result')  # DFT
+        fft = self.fast_fourier_transform(True, self.s, root, 2, 0, 'Final Result')  # DFT
 
     def start_recording(self):
         frames_per_buffer = 1024
