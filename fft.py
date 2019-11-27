@@ -185,7 +185,6 @@ class Main:
         fig2 = plt.figure(constrained_layout=True)
         gs = gridspec.GridSpec(2, 2, fig2, bottom=.05)  # Initialize the figure
 
-        plt.figure()
 
         sp1 = plt.subplot(gs[0, 0])  # row 0, span all columns
         sp1.set_title('Signal')
