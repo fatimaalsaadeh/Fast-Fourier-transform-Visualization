@@ -13,6 +13,7 @@ class Main:
     fr1, fr2, am1, am2 = 0, 0, 0, 0
     sp1, sp2, sp3, sp4 = None, None, None, None
     t, sn = 0, 0
+    frames = []
     fig = None
 
     def fast_fourier_transform(self, is_sbs, samples, root, count, layer, side):  # FFT algorithm starts here
@@ -88,6 +89,92 @@ class Main:
 
     def polar_plot(self, cn):  # polar plot of complex number using the angle and
         self.sp3.plot([0, np.angle(cn)], [0, abs(cn)], marker='o')
+
+    def plot_it(self):
+        file_name = "voice.wav"
+        rate = 44100
+        channels = 2
+
+        wf = wave.open(file_name, 'wb')
+        wf.setnchannels(channels)
+        wf.setsampwidth(pyaudio.get_sample_size(pyaudio.paInt16))
+        wf.setframerate(rate)
+        wf.writeframes(b''.join(self.frames))
+        wf.close()
+
+        wave_sample_rate, wave_data = wavfile.read('voice.wav')
+        wave_data_sum = wave_data.sum(axis=1) / 2
+        wave_data = np.array(wave_data_sum, dtype='int16')
+        amplitude = wave_data  # (SIGNAL AMPLITUDE)
+        fs = wave_sample_rate  # (SAMPLING RATE HZ)
+        sn = wave_data.size  # Signal samples
+        t = np.linspace(0, sn / fs, sn)  # time of each sample vector
+
+        # Fast Fourier Transform
+        fft = self.fast_fourier_transform(False, wave_data, math.e ** (2 * math.pi * 1j / sn), 2)  # DFT
+        fft_phase = np.angle(fft)  # (DFT ANGLE rads)
+        fft_amplitude = np.abs(fft)  # (DFT AMPLITUDE)
+        ti = t[1] - t[0]
+        f = np.linspace(0, 1 / ti, sn)  # 1/ti duration signal
+
+        fig2 = plt.figure(constrained_layout=True)
+        gs = gridspec.GridSpec(2, 2, fig2, bottom=.05)
+
+        sp1 = plt.subplot(gs[0, 0])
+        sp1.set_title('Signal')
+        sp1.set_ylabel('Amplitude')
+        sp1.set_xlabel('Time [s]')
+        sp1.plot(t, amplitude)
+
+        sp2 = plt.subplot(gs[1, 0])
+        sp2.set_title('Amplitude Spectrum')
+        sp2.set_ylabel('Amplitude')
+        sp2.set_xlabel('Frequency (Hz)')
+        sp2.plot(f, fft_amplitude, color='red')
+
+        sp3 = plt.subplot(gs[0, 1], projection="polar")
+        sp3.set_title('Phase Spectrum')
+        sp3.set_ylabel('Phase (rads)')
+        sp3.set_xlabel('Frequency (Hz)')
+        sp3.plot(fft_phase, fft_amplitude, marker='o', color='orange')
+
+        plt.show()
+
+    def start_recording(self):
+        frames_per_buffer = 1024
+        rate = 44100
+        channels = 2
+        record_seconds = 3
+
+        p = pyaudio.PyAudio()
+
+        stream = p.open(format=pyaudio.paInt16,
+                        channels=channels,
+                        rate=rate,
+                        input=True,
+                        frames_per_buffer=frames_per_buffer)
+
+        for i in range(0, int(rate / frames_per_buffer * record_seconds)):
+            s = stream.read(frames_per_buffer)
+            self.frames.append(s)
+        stream.stop_stream()
+        stream.close()
+        p.terminate()
+
+    def audio_processing(self):
+        master2 = tk.Tk()
+        tk.Button(master2,
+                  text='Start Recording',
+                  command=self.start_recording).grid(row=4,
+                                                     column=1,
+                                                     sticky=tk.W,
+                                                     pady=4)
+        tk.Button(master2,
+                  text='Plot It',
+                  command=self.plot_it).grid(row=4,
+                                             column=2,
+                                             sticky=tk.W,
+                                             pady=4)
 
     def final_result(self, fr1, am1, fr2, am2):
         try:
@@ -213,6 +300,12 @@ class Main:
                                                   column=1,
                                                   sticky=tk.W,
                                                   pady=4)
+        tk.Button(master,
+                  text='Talk to me',
+                  command=self.audio_processing).grid(row=4,
+                                                      column=2,
+                                                      sticky=tk.W,
+                                                      pady=4)
         master.mainloop()
 
 
