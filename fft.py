@@ -75,7 +75,9 @@ class Main:
             self.sp4.legend(labels=('Left', 'Right'), loc=1)
 
             ti = self.t[1] - self.t[0]  # Take a discrete interval from the signal time domain
-            f = np.linspace(0, 1 / ti, self.sn)  # 1/ti duration signal
+            f = np.linspace(-self.sn, self.sn, self.sn)  # 1/ti duration signal
+
+            r = np.roll(r, -len(r)//2)
             for p1, p2 in zip(f, r):  # Plot the frequency domain and polar
                 self.sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
                 self.sp2.bar(p1, abs(p2), width=1.5)  # 1 / N is a normalization factor
@@ -208,11 +210,11 @@ class Main:
 
         root = math.e ** (2 * math.pi * 1j / sn)  # root of unity
         fft = self.fast_fourier_transform(False, s, root, 2, 0, 'Final Result')  # get the signal in frequency domain (DFT)
-        f = np.linspace(-sn/2, 1 / ti, sn/2)  # 1/ti duration signal
-        fft=fft[0:sn//2]
+        f = np.linspace(-sn, sn, fs)  # 1/ti duration signal
+        fft=np.roll(fft,sn//2)
         for p1, p2 in zip(f, fft):
             sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
-            sp2.bar(p1, abs(2*p2), width=1.5)  # 1 / N is a normalization factor
+            sp2.bar(p1, abs(p2), width=1.5)  # 1 / N is a normalization factor
         plt.show()
 
     def step_by_step(self, fr1, am1, fr2, am2):
