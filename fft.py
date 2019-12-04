@@ -65,7 +65,7 @@ class Main:
 
             self.sp4.set_title('Current Left and Right Points')
             self.sp4.set_ylabel('Imaginary Value')  # ∠X(k)
-            self.sp4.set_yticks(np.arange(-math.pi, math.pi + 1, math.pi / 2))
+            # self.sp4.set_yticks(np.arange(-math.pi, math.pi + 1, math.pi / 2))
             self.sp4.set_xlabel('Real Value')
 
             plt.tight_layout()
@@ -175,8 +175,8 @@ class Main:
         except:
             messagebox.showerror("Input", "Invalid Input")
             return
-        fs = 500  # (SAMPLING RATE HZ)
-        self.t = np.linspace(0, 250 / 500, fs)  # (SAMPLING PERIOD s)
+        fs = 512  # (SAMPLING RATE HZ)
+        self.t = np.linspace(0, 256 / 512, fs)  # (SAMPLING PERIOD s)
         s = am1 * np.sin(fr1 * 2 * np.pi * self.t) + am2 * np.sin(
             fr2 * 2 * np.pi * self.t)  # (SINE WAVE)
         ti = self.t[1] - self.t[0]
@@ -194,24 +194,25 @@ class Main:
         plt.plot(self.t, s)  # (time, amplitude)
 
         sp3 = plt.subplot(gs[0, 1], projection='polar')  # row 1, span all columns
-        sp3.set_title('Amplitude Spectrum')
-        sp3.set_ylabel('Amplitude')  # |X[f]|
-        sp3.set_xlabel('Frequency (Hz)')
+        sp3.set_title('Phase Spectrum')
+        # sp3.set_ylabel('Phase (rads)')  # ∠X(k)
+        # sp3.set_xlabel('Frequency (Hz)')
+        # sp3.set_xscale('log')
         sp3.grid('on')
 
         sp2 = plt.subplot(gs[1,:])  # row 2, span all columns
-        sp2.set_title('Phase Spectrum')
-        sp2.set_ylabel('Phase (rads)')  # ∠X(k)
+        sp2.set_title('Amplitude Spectrum')
+        sp2.set_ylabel('Amplitude')  # |X[f]|
         sp2.set_xlabel('Frequency (Hz)')
-        sp2.set_xscale('log')
         sp2.grid('on')
 
         root = math.e ** (2 * math.pi * 1j / sn)  # root of unity
         fft = self.fast_fourier_transform(False, s, root, 2, 0, 'Final Result')  # get the signal in frequency domain (DFT)
-        f = np.linspace(0, 1 / ti, sn)  # 1/ti duration signal
+        f = np.linspace(-sn/2, 1 / ti, sn/2)  # 1/ti duration signal
+        fft=fft[0:sn//2]
         for p1, p2 in zip(f, fft):
             sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
-            sp2.bar(p1, abs(p2), width=1.5)  # 1 / N is a normalization factor
+            sp2.bar(p1, abs(2*p2), width=1.5)  # 1 / N is a normalization factor
         plt.show()
 
     def step_by_step(self, fr1, am1, fr2, am2):
