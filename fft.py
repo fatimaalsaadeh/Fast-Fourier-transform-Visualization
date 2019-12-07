@@ -176,7 +176,7 @@ class Main:
         except:
             messagebox.showerror("Input", "Invalid Input")
             return
-        fs = sr  # (SAMPLING RATE HZ)
+        fs = int(sr)  # (SAMPLING RATE HZ)
         self.t = np.linspace(0, (.5*fs) / fs, fs)  # (SAMPLING PERIOD s)
         s = am1 * np.sin(fr1 * 2 * np.pi * self.t) + am2 * np.sin(
             fr2 * 2 * np.pi * self.t)  # (SINE WAVE)
@@ -208,6 +208,7 @@ class Main:
         root = math.e ** (2 * math.pi * 1j / fs)  # root of unity
         fft = self.fast_fourier_transform(False, s, root, 2, 0, 'Final Result')  # get the signal in frequency domain (DFT)
         f = np.linspace(-fs-1, fs-1, fs, dtype=int)  # 1/ti duration signal
+        print(f)
         fft = np.roll(fft,fs//2)
         for p1, p2 in zip(f, fft):
             sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
@@ -220,7 +221,7 @@ class Main:
         except:
             messagebox.showerror("Input", "Invalid Input")
             return
-        fs = sr  # (SAMPLING RATE HZ)
+        fs = int(sr)  # (SAMPLING RATE HZ)
         self.t = np.linspace(0, (.5*fs) / fs, fs)  # (SAMPLING PERIOD s)
 
         s = am1 * np.sin(fr1 * 2 * np.pi * self.t) + am2 * np.sin(
@@ -287,13 +288,13 @@ class Main:
         # submit values and begin visualization
         tk.Button(master,
                   text='Step By Step',
-                  command= lambda: self.step_by_step(f1.get(), a1.get(), f2.get(), a2.get(), self.sr)).grid(row=5,
+                  command= lambda: self.step_by_step(f1.get(), a1.get(), f2.get(), a2.get(), sr.get())).grid(row=5,
                                                   column=0,
                                                   sticky=tk.W,
                                                   pady=4)
         tk.Button(master,
                   text='Final Results',
-                  command=lambda: self.final_result(f1.get(), a1.get(), f2.get(), a2.get(), self.sr)).grid(row=5,
+                  command=lambda: self.final_result(f1.get(), a1.get(), f2.get(), a2.get(), sr.get())).grid(row=5,
                                                   column=1,
                                                   sticky=tk.W,
                                                   pady=4)
