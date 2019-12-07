@@ -10,7 +10,7 @@ from tkinter import messagebox
 
 
 class Main:
-    fr1, fr2, am1, am2 = 0, 0, 0, 0
+    fr1, fr2, am1, am2, sr = 0, 0, 0, 0, 0
     sp1, sp2, sp3, sp4 = None, None, None, None
     t, sn = 0, 0
     frames = []
@@ -76,8 +76,8 @@ class Main:
 
             ti = self.t[1] - self.t[0]  # Take a discrete interval from the signal time domain
             f = np.linspace(-len(r)-1, len(r)-1, len(r), dtype=int)
-            r = np.roll(r, len(r)//2)
-            for p1, p2 in zip(f, r):  # Plot the frequency domain and polar
+            q = np.roll(r, len(r)//2)
+            for p1, p2 in zip(f, q):  # Plot the frequency domain and polar
                 self.sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
                 self.sp2.bar(p1, abs(p2), width=1.5)  # 1 / N is a normalization factor
                 plt.pause(.0001)
@@ -170,21 +170,20 @@ class Main:
                                              sticky=tk.W,
                                              pady=4)
 
-    def final_result(self, fr1, am1, fr2, am2):
+    def final_result(self, fr1, am1, fr2, am2, sr):
         try:
-            fr1, am1, fr2, am2 = float(fr1), float(am1), float(fr2), float(am2)
+            fr1, am1, fr2, am2, sr = float(fr1), float(am1), float(fr2), float(am2), int(sr)
         except:
             messagebox.showerror("Input", "Invalid Input")
             return
-        fs = 512  # (SAMPLING RATE HZ)
-        self.t = np.linspace(0, 256 / 512, fs)  # (SAMPLING PERIOD s)
+        fs = sr  # (SAMPLING RATE HZ)
+        self.t = np.linspace(0, (.5*fs) / fs, fs)  # (SAMPLING PERIOD s)
         s = am1 * np.sin(fr1 * 2 * np.pi * self.t) + am2 * np.sin(
             fr2 * 2 * np.pi * self.t)  # (SINE WAVE)
         ti = self.t[1] - self.t[0]
 
         fig2 = plt.figure(constrained_layout=True)
         gs = gridspec.GridSpec(2, 2, fig2, bottom=.05)  # Initialize the figure
-
 
         sp1 = plt.subplot(gs[0, 0])  # row 0, span all columns
         sp1.set_title('Signal')
@@ -215,14 +214,14 @@ class Main:
             sp2.bar(p1, abs(p2), width=1.5, align='center')  # 1 / N is a normalization factor
         plt.show()
 
-    def step_by_step(self, fr1, am1, fr2, am2):
+    def step_by_step(self, fr1, am1, fr2, am2, sr):
         try:
-            fr1, am1, fr2, am2 = float(fr1), float(am1), float(fr2), float(am2)
+            fr1, am1, fr2, am2, sr = float(fr1), float(am1), float(fr2), float(am2), int(sr)
         except:
             messagebox.showerror("Input", "Invalid Input")
             return
-        fs = 512  # (SAMPLING RATE HZ)
-        self.t = np.linspace(0, 256 / 512, fs)  # (SAMPLING PERIOD s)
+        fs = sr  # (SAMPLING RATE HZ)
+        self.t = np.linspace(0, (.5*fs) / fs, fs)  # (SAMPLING PERIOD s)
 
         s = am1 * np.sin(fr1 * 2 * np.pi * self.t) + am2 * np.sin(
             fr2 * 2 * np.pi * self.t)  # (SINE WAVE)
@@ -258,44 +257,49 @@ class Main:
         tk.Label(master, text="Amplitude Sinusoid 1").grid(row=1)
         tk.Label(master, text="Frequency (Hz) Sinusoid 2").grid(row=2)
         tk.Label(master, text="Amplitude Sinusoid 2").grid(row=3)
+        tk.Label(master, text="Sampling Rate").grid(row=4)
 
         # input rows
         f1 = tk.Entry(master)
         a1 = tk.Entry(master)
         f2 = tk.Entry(master)
         a2 = tk.Entry(master)
+        sr = tk.Entry(master)
         # default values
         f1.insert(10, "40")
         a1.insert(10, "1")
         f2.insert(10, "70")
         a2.insert(10, ".4")
+        sr.insert(10, "512")
 
         f1.grid(row=0, column=1)
         a1.grid(row=1, column=1)
         f2.grid(row=2, column=1)
         a2.grid(row=3, column=1)
+        sr.grid(row=4, column=1)
 
         self.fr1 = float(f1.get())  # get Frequency 1 in Hz from user input
         self.am1 = float(a1.get())  # amplitude 1
         self.fr2 = float(f2.get())  # get Frequency 2 in Hz from user input
         self.am2 = float(a2.get())  # amplitude 2
+        self.sr = int(sr.get())     # sampling rate
 
         # submit values and begin visualization
         tk.Button(master,
                   text='Step By Step',
-                  command= lambda: self.step_by_step(f1.get(), a1.get(), f2.get(), a2.get())).grid(row=4,
+                  command= lambda: self.step_by_step(f1.get(), a1.get(), f2.get(), a2.get(), self.sr)).grid(row=5,
                                                   column=0,
                                                   sticky=tk.W,
                                                   pady=4)
         tk.Button(master,
                   text='Final Results',
-                  command=lambda: self.final_result(f1.get(), a1.get(), f2.get(), a2.get())).grid(row=4,
+                  command=lambda: self.final_result(f1.get(), a1.get(), f2.get(), a2.get(), self.sr)).grid(row=5,
                                                   column=1,
                                                   sticky=tk.W,
                                                   pady=4)
         tk.Button(master,
                   text='Talk to me',
-                  command=self.audio_processing).grid(row=4,
+                  command=self.audio_processing).grid(row=5,
                                                       column=2,
                                                       sticky=tk.W,
                                                       pady=4)
