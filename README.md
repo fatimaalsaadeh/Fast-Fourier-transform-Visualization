@@ -4,6 +4,10 @@ This system will analyze a given signal by computing the Discrete Fourier Transf
 This process is usually long and slow on large sample sizes.
 Using the Fast Fourier transform, this application will make this process faster by breaking down the signal sample size into smaller sized samples,
 recurring on them separately, and then merging the results to produce the final representation of the signal in the frequency domain.
+
+
+![Image description](https://github.com/fatiemahsaadeh/fft_visualization_project/blob/master/Figure_1.png)
+
 ## Getting Started
 
 clone the project:
