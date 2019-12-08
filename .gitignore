@@ -1,3 +1,7 @@
 .idea/
 venv
 .DS_Store
+fft_memory_profile.log
+memory_profile.log
+memory_profiler_basic_mean.log
+
