@@ -4,4 +4,5 @@ venv
 fft_memory_profile.log
 memory_profile.log
 memory_profiler_basic_mean.log
+__pycache__/fft.cpython-37.pyc
 
