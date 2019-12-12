@@ -7,6 +7,7 @@ import pyaudio
 from matplotlib import gridspec
 from scipy.io import wavfile
 from tkinter import messagebox
+import matplotlib.cm as cm
 
 # Ashley Dunn, Fatima AlSaadeh
 # FFT visualizations
@@ -79,10 +80,12 @@ class Main:
             ti = self.t[1] - self.t[0]  # Take a discrete interval from the signal time domain
             f = np.linspace(-len(r)-1, len(r)-1, len(r), dtype=int)
             q = np.roll(r, len(r)//2)
+            colors = cm.rainbow(np.linspace(0, 1, 360))
             for p1, p2 in zip(f, q):  # Plot the frequency domain and polar
-                self.sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
-                self.sp2.bar(p1, abs(p2), width=1.5)  # 1 / N is a normalization factor
-                plt.pause(.0001)
+                thiscolor = colors[int(round(np.angle(p2, deg=True)))]
+                self.sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o', color=thiscolor)
+                self.sp2.bar(p1, abs(p2), width=1.5, color=thiscolor)  # 1 / N is a normalization factor
+                plt.pause(.00001)
 
             plt.waitforbuttonpress()
             self.sp2.cla()
