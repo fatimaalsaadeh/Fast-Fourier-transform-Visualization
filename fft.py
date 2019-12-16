@@ -174,6 +174,7 @@ class Main:
 
     def audio_processing(self):
         master2 = tk.Tk()
+        master2.title("Talk to Me")
         tk.Button(master2,
                   text='Start Recording',
                   command=self.start_recording).grid(row=4,
