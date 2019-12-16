@@ -82,9 +82,9 @@ class Main:
             q = np.roll(r, len(r)//2)
             colors = cm.rainbow(np.linspace(0, 1, 360))
             for p1, p2 in zip(f, q):  # Plot the frequency domain and polar
-                thiscolor = colors[int(round(np.angle(p2, deg=True)))]
-                self.sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o', color=thiscolor)
-                self.sp2.bar(p1, abs(p2), width=1.5, color=thiscolor)  # 1 / N is a normalization factor
+                this_color = colors[int(round(np.angle(p2, deg=True)))]
+                self.sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o', color=this_color)
+                self.sp2.bar(p1, abs(p2), width=1.5, color=this_color)  # 1 / N is a normalization factor
                 plt.pause(.00001)
 
             plt.waitforbuttonpress()
@@ -96,9 +96,9 @@ class Main:
     def polar_plot(self, cn):  # polar plot of complex number using the angle and
         self.sp3.plot([0, np.angle(cn)], [0, abs(cn)], marker='o')
 
-    def plot_it(self):
+    def plot_it(self, is_sbs):
         file_name = "voice.wav"
-        rate = 44100
+        rate = 1024
         channels = 2
 
         wf = wave.open(file_name, 'wb')
@@ -115,7 +115,8 @@ class Main:
         self.s = wave_data  # (SIGNAL AMPLITUDE)
         fs = wave_sample_rate  # (SAMPLING RATE HZ)
         self.sn = self.s.size  # Signal samples
-        self.t = np.linspace(0, self.sn / fs, self.sn)  # time of each sample vector
+        print(self.sn)
+        self.t = np.linspace(0, 1, self.sn)  # time of each sample vector
 
         # fig2 = plt.figure(constrained_layout=True)
         self.fig = plt.figure()
@@ -128,20 +129,31 @@ class Main:
         # polar plot
         self.sp3 = plt.subplot(gs[0, 1], projection='polar')  # row 1, span all columns
 
-        # amplitude plot
-        self.sp2 = plt.subplot(gs[1, 1])  # row 2, span all columns
-
-        # left/right values
-        self.sp4 = plt.subplot(gs[1, 0])  # row 2, span all columns
+        if is_sbs:
+            # amplitude plot
+            self.sp2 = plt.subplot(gs[1, 1])  # row 2, span all columns
+            # left/right values
+            self.sp4 = plt.subplot(gs[1, 0])  # row 2, span all columns
+        else:
+            self.sp2 = plt.subplot(gs[1,:])  # row 2, span all columns
 
         plt.tight_layout()
         # Fast Fourier Transform
         root = math.e ** (2 * math.pi * 1j / self.sn)
-        fft = self.fast_fourier_transform(True, self.s, root, 2, 0, 'Final Result')  # DFT
+        fft = self.fast_fourier_transform(is_sbs, self.s, root, 2, 0, 'Final Result')  # DFT
+        if not is_sbs:
+            f = np.linspace(-fs-1, fs-1, fs, dtype=int)  # 1/ti duration signal
+            fft = np.roll(fft,fs//2)
+            colors = cm.rainbow(np.linspace(0, 1, 360))
+            for p1, p2 in zip(f, fft):
+                this_color = colors[int(round(np.angle(p2, deg=True)))]
+                self.sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o', color=this_color)
+                self.sp2.bar(p1, abs(p2), width=1.5, align='center', color=this_color)  # 1 / N is a normalization factor
+            plt.show()
 
     def start_recording(self):
         frames_per_buffer = 1024
-        rate = 44100
+        rate = 1024
         channels = 2
         record_seconds = 1
 
@@ -170,8 +182,14 @@ class Main:
                                                      pady=4)
         tk.Button(master2,
                   text='Plot It',
-                  command=self.plot_it).grid(row=4,
+                  command=lambda: self.plot_it(True)).grid(row=4,
                                              column=2,
+                                             sticky=tk.W,
+                                             pady=4)
+        tk.Button(master2,
+                  text='Final Result',
+                  command=lambda: self.plot_it(False)).grid(row=4,
+                                             column=3,
                                              sticky=tk.W,
                                              pady=4)
 
@@ -213,11 +231,12 @@ class Main:
         root = math.e ** (2 * math.pi * 1j / fs)  # root of unity
         fft = self.fast_fourier_transform(False, s, root, 2, 0, 'Final Result')  # get the signal in frequency domain (DFT)
         f = np.linspace(-fs-1, fs-1, fs, dtype=int)  # 1/ti duration signal
-        print(f)
         fft = np.roll(fft,fs//2)
+        colors = cm.rainbow(np.linspace(0, 1, 360))
         for p1, p2 in zip(f, fft):
-            sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o')
-            sp2.bar(p1, abs(p2), width=1.5, align='center')  # 1 / N is a normalization factor
+            this_color = colors[int(round(np.angle(p2, deg=True)))]
+            sp3.plot([0, np.angle(p2)], [0, abs(p2)], marker='o', color=this_color)
+            sp2.bar(p1, abs(p2), width=1.5, align='center', color=this_color)  # 1 / N is a normalization factor
         plt.show()
 
     def step_by_step(self, fr1, am1, fr2, am2, sr):
