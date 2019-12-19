@@ -6,7 +6,9 @@ Using the Fast Fourier transform, this application will make this process faster
 recurring on them separately, and then merging the results to produce the final representation of the signal in the frequency domain.
 
 
-![Image description](https://github.com/fatiemahsaadeh/fft_visualization_project/blob/master/Figure_1.png)
+![Image description](https://github.com/fatiemahsaadeh/fft_visualization_project/blob/master/final_colored.png)
+
+![Image description](https://github.com/fatiemahsaadeh/fft_visualization_project/blob/master/final_speaking.png)
 
 ## Getting Started
 
